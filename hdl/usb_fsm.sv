@@ -42,7 +42,7 @@ enum int unsigned{
     STATE_IDLE, STATE_RX_DATA, STATE_TX_PID, STATE_TX_DATA,
     STATE_TX_CRC1, STATE_TX_CRC2, STATE_TX_TOKEN1, STATE_TX_TOKEN2, STATE_TX_TOKEN3,
     STATE_TX_ACKNAK, STATE_TX_WAIT, STATE_RX_WAIT1, STATE_RX_WAIT2,
-    STATE_TX_IFS, STATE_TX_TURNAROUND, STATE_RESET, STATE_INIT1, STATE_INIT2
+    STATE_TX_IFS, STATE_TX_TURNAROUND, STATE_RESET, STATE_INIT1, STATE_INIT2, STATE_INIT3
 } state_q, next_state_r;
 
 //local param
@@ -621,7 +621,12 @@ always_comb begin
         begin
             data_o_tmp = INIT2;
             if(nxt_i)
-                next_state_r = STATE_IDLE;
+                next_state_r = STATE_INIT3;
+        end
+        STATE_INIT3:
+        begin
+            stp_o_tmp = 1'b1;
+            next_state_r = STATE_IDLE;
         end
         default :
         begin
