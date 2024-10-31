@@ -179,6 +179,7 @@ logic   new_read_tmp;
 logic   active_read_tmp;
 logic   active_IN_q;
 logic   active_IN_start, active_IN_stop;
+logic   init_q, init_w;
 
 //-----------------------------------------------------------------
 // State Machine
@@ -603,7 +604,7 @@ always_comb begin
         STATE_IDLE :
         begin
            // Token transfer request
-           if (start)
+           if (start || init_q)
               next_state_r  = STATE_TX_TOKEN1;
         end
         STATE_RESET:
@@ -708,6 +709,14 @@ always_ff @( posedge clk ) begin
         connect_q <= 1'b1;
     else 
         connect_q <= connect_q;
+end
+
+assign init_w = (rx_cmd_fnd_w && (rx_linestate_w==LINESTATE_J));
+always_ff @( posedge clk ) begin 
+    if(rst)
+        init_q <= 1'b0;
+    else 
+        init_q <= init_w;
 end
 
 // determine if connection just happened (the moment it connected)
