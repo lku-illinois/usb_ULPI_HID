@@ -88,11 +88,12 @@ localparam LINESTATE_J      = 2'b01;
 localparam LINESTATE_K      = 2'b10;
 
 localparam SOF_COUNT = 16'd60000;
-
 localparam RX_TIMEOUT_DIR = 6'd60;
 localparam RX_TIMEOUT_NXT = 15'd30000;
 localparam TX_TIMEOUT_DIR = 6'd60;
 
+localparam INIT1 = 8'h85;
+localparam INIT2 = 8'h20;
 
 
 // flag for what token packet to send
@@ -605,6 +606,23 @@ always_comb begin
            if (start)
               next_state_r  = STATE_TX_TOKEN1;
         end
+        STATE_RESET:
+        begin
+            if(!dir_i)
+                next_state_r = STATE_INIT1;
+        end
+        STATE_INIT1:
+        begin
+            data_o_tmp = INIT1;
+            if(nxt_i)
+                next_state_r = STATE_INIT2;
+        end
+        STATE_INIT2:
+        begin
+            data_o_tmp = INIT2;
+            if(nxt_i)
+                next_state_r = STATE_IDLE;
+        end
         default :
         begin
             // data_o_tmp = 8'b00000000;
@@ -630,10 +648,18 @@ end
 // Update state
 always_ff @( posedge clk ) begin 
     if(rst) 
-        state_q   <= STATE_IDLE;
+        state_q   <= STATE_RESET;
     else 
         state_q   <= next_state_r;
 end
+
+// // Update state
+// always_ff @( posedge clk ) begin 
+//     if(rst) 
+//         state_q   <= STATE_IDLE;
+//     else 
+//         state_q   <= next_state_r;
+// end
 
 
 
