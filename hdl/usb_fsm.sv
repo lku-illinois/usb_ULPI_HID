@@ -743,7 +743,8 @@ always_ff @( posedge clk ) begin
         connect_q <= connect_q;
 end
 
-assign init_w = (rx_cmd_fnd_w && (rx_linestate_w==LINESTATE_J));
+assign init_w = (rx_cmd_fnd_w && (rx_linestate_w==LINESTATE_J) && !rx_hostdisconnect_w);
+
 always_ff @( posedge clk ) begin 
     if(rst)
         init_q <= 1'b0;
