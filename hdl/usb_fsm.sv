@@ -625,9 +625,9 @@ always_comb begin
         end
         STATE_DRESET2:
         begin
-            data_o_tmp = DRESET1;
+            data_o_tmp = DRESET2;
             if(nxt_i)
-                next_state_r = STATE_DRESET2;
+                next_state_r = STATE_DRESET3;
         end
         STATE_DRESET3:
         begin
