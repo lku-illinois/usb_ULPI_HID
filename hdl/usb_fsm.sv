@@ -42,7 +42,8 @@ enum int unsigned{
     STATE_IDLE, STATE_RX_DATA, STATE_TX_PID, STATE_TX_DATA,
     STATE_TX_CRC1, STATE_TX_CRC2, STATE_TX_TOKEN1, STATE_TX_TOKEN2, STATE_TX_TOKEN3,
     STATE_TX_ACKNAK, STATE_TX_WAIT, STATE_RX_WAIT1, STATE_RX_WAIT2,
-    STATE_TX_IFS, STATE_TX_TURNAROUND, STATE_RESET, STATE_INIT1, STATE_INIT2, STATE_INIT3
+    STATE_TX_IFS, STATE_TX_TURNAROUND, STATE_RESET, STATE_INIT1, STATE_INIT2, STATE_INIT3,
+    STATE_DRESET1, STATE_DRESET2, STATE_DRESET3, STATE_DRESET_WAIT
 } state_q, next_state_r;
 
 //local param
@@ -92,8 +93,13 @@ localparam RX_TIMEOUT_DIR = 6'd60;
 localparam RX_TIMEOUT_NXT = 15'd30000;
 localparam TX_TIMEOUT_DIR = 6'd60;
 
-localparam INIT1 = 8'h85;
-localparam INIT2 = 8'h20;
+localparam INIT1 = 8'h84;
+localparam INIT2 = 8'h41;
+localparam DRESET1 = 8'h85;
+localparam DRESET2 = 8'h20;
+
+localparam DRESET_COUNT = 9'd350;
+
 
 
 // flag for what token packet to send
@@ -180,6 +186,8 @@ logic   active_read_tmp;
 logic   active_IN_q;
 logic   active_IN_start, active_IN_stop;
 logic   init_q, init_w;
+logic   dreset_counter_done;
+logic   [8:0] dreset_counter;
 
 //-----------------------------------------------------------------
 // State Machine
@@ -604,8 +612,32 @@ always_comb begin
         STATE_IDLE :
         begin
            // Token transfer request
-           if (start || init_q)
-              next_state_r  = STATE_TX_TOKEN1;
+            if(init_q)
+                next_state_r = STATE_DRESET1;
+            else if (start)
+                next_state_r = STATE_TX_TOKEN1;
+        end
+        STATE_DRESET1:
+        begin
+            data_o_tmp = DRESET1;
+            if(nxt_i)
+                next_state_r = STATE_DRESET2;
+        end
+        STATE_DRESET2:
+        begin
+            data_o_tmp = DRESET1;
+            if(nxt_i)
+                next_state_r = STATE_DRESET2;
+        end
+        STATE_DRESET3:
+        begin
+            stp_o_tmp = 1'b1;   
+            next_state_r = STATE_DRESET_WAIT;
+        end
+        STATE_DRESET_WAIT:
+        begin
+            if(dreset_counter_done)
+                next_state_r = STATE_TX_TOKEN1;
         end
         STATE_RESET:
         begin
@@ -955,6 +987,21 @@ always_ff @( posedge clk ) begin
     else if (active_IN_start) active_IN_q <= 1'b1;
     else if (active_IN_stop) active_IN_q <= 1'b0;
     else active_IN_q <= active_IN_q;
+end
+
+always_ff @( posedge clk ) begin 
+    if(dreset_counter == DRESET_COUNT - 1) begin
+        dreset_counter <= 16'h00;
+        dreset_counter_done <= 1'b1;
+    end
+    else if(state_q == STATE_DRESET_WAIT) begin
+        dreset_counter <= dreset_counter + 1;
+        dreset_counter_done <= 1'b0;
+    end
+    else begin
+        dreset_counter <= '0;
+        dreset_counter_done<= 1'b0;
+    end
 end
 
 assign start = connect_q && (state_q==STATE_IDLE);
