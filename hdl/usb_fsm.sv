@@ -55,11 +55,11 @@ localparam DATA0_PID = 8'h43;           //8'b01000011;
 localparam DATA1_PID = 8'h4b;           //8'b01001011;
 localparam ACK_PID   = 8'h42;           //8'b01000010;
 
-localparam TOKEN_SOF_CRC5 = 5'b11111;
-localparam TOKEN_IN_CRC5 = 5'b11111;
-localparam TOKEN_OUT_CRC5 = 5'b11111;
-localparam TOKEN_SETUP_ADDR_CRC5 = 5'b11111;
-localparam TOKEN_SETUP_CFG_CRC5 = 5'b11111;
+localparam TOKEN_SOF_CRC5 = 5'b00000;
+localparam TOKEN_IN_CRC5 = 5'b00000;
+localparam TOKEN_OUT_CRC5 = 5'b00000;
+localparam TOKEN_SETUP_ADDR_CRC5 = 5'b00000;
+localparam TOKEN_SETUP_CFG_CRC5 = 5'b00000;
 
 
 localparam ADDR0     = 7'h00;
@@ -94,11 +94,11 @@ localparam RX_TIMEOUT_NXT = 15'd30000;
 localparam TX_TIMEOUT_DIR = 6'd60;
 
 localparam INIT1 = 8'h84;
-localparam INIT2 = 8'h41;
+localparam INIT2 = 8'h45;
 localparam DRESET1 = 8'h85;
 localparam DRESET2 = 8'h20;
 
-localparam DRESET_COUNT = 9'd350;
+localparam DRESET_COUNT = 9'd180;
 
 
 
