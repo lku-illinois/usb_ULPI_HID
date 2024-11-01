@@ -43,6 +43,7 @@ enum int unsigned{
     STATE_TX_CRC1, STATE_TX_CRC2, STATE_TX_TOKEN1, STATE_TX_TOKEN2, STATE_TX_TOKEN3,
     STATE_TX_ACKNAK, STATE_TX_WAIT, STATE_RX_WAIT1, STATE_RX_WAIT2,
     STATE_TX_IFS, STATE_TX_TURNAROUND, STATE_RESET, STATE_INIT1, STATE_INIT2, STATE_INIT3,
+    STATE_INIT4, STATE_INIT5, STATE_INIT6,
     STATE_DRESET1, STATE_DRESET2, STATE_DRESET3, STATE_DRESET_WAIT
 } state_q, next_state_r;
 
@@ -657,6 +658,23 @@ always_comb begin
                 next_state_r = STATE_INIT3;
         end
         STATE_INIT3:
+        begin
+            stp_o_tmp = 1'b1;
+            next_state_r = STATE_INIT4;
+        end
+        STATE_INIT4:
+        begin
+            data_o_tmp = DRESET1;
+            if(nxt_i)
+                next_state_r = STATE_INIT5;
+        end
+        STATE_INIT5:
+        begin
+            data_o_tmp = DRESET2;
+            if(nxt_i)
+                next_state_r = STATE_INIT6;
+        end
+        STATE_INIT6:
         begin
             stp_o_tmp = 1'b1;
             next_state_r = STATE_IDLE;
